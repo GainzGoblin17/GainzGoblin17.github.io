@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Teacher's Pokédex of Common Pitfalls</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-bg: #1C2143;
+            --secondary-bg: #29305A;
+            --accent-color: #5B42F3;
+            --accent-hover: #4C37D1;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B8E8;
+            --success-color: #4CAF50;
+            --danger-color: #F44336;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .guide-container {
+            display: flex; width: 100%; max-width: 1400px;
+            margin: 2rem auto; background-color: var(--secondary-bg);
+            border-radius: 20px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* --- Left Navigation Column --- */
+        .nav-panel {
+            flex: 0 0 300px; background-color: var(--primary-bg);
+            padding: 2rem 1rem; border-right: 2px solid var(--accent-color);
+        }
+        .nav-panel h1 { font-size: 1.5rem; text-align: center; margin-bottom: 2rem; color: var(--text-primary); }
+        .nav-list { list-style-type: none; }
+        .nav-item {
+            padding: 1rem 1.5rem; margin-bottom: 1rem; border-radius: 10px;
+            cursor: pointer; transition: background-color 0.2s ease, transform 0.2s ease;
+            font-weight: 600; border-left: 5px solid transparent;
+        }
+        .nav-item:hover { background-color: rgba(255, 255, 255, 0.05); transform: translateX(5px); }
+        .nav-item.active {
+            background-color: var(--accent-color); color: var(--text-primary);
+            border-left: 5px solid var(--text-primary); transform: translateX(0);
+        }
+        
+        /* --- Right Content Column --- */
+        .content-panel { flex-grow: 1; padding: 2rem 3rem; overflow-y: auto; }
+        .pokemon-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem; }
+        #pokemon-sprite {
+            width: 150px; height: 150px; image-rendering: pixelated;
+            filter: drop-shadow(0 0 10px var(--accent-color));
+        }
+        .pokemon-title h2 { font-size: 2.5rem; font-weight: 700; }
+        
+        .type-badge {
+            display: inline-block; padding: 0.35rem 0.9rem; border-radius: 5px;
+            font-weight: 600; margin: 0.25rem; color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .type-none { background-color: #6D6D4E; }
+        .type-normal { background-color: #A8A878; } .type-water { background-color: #6890F0; }
+        .type-psychic { background-color: #F85888; } .type-fighting { background-color: #C03028; }
+        .type-electric { background-color: #F8D030; color: #333; text-shadow: none; }
+        .type-grass { background-color: #78C850; } .type-bug { background-color: #A8B820; }
+        .type-ghost { background-color: #705898; } .type-dark { background-color: #705848; }
+        .type-fire { background-color: #F08030; } .type-ground { background-color: #E0C068; color: #333; text-shadow: none; }
+        .type-rock { background-color: #B8A038; } .type-poison { background-color: #A040A0; }
+
+
+        .type-matchups {
+            margin-bottom: 2rem; background: rgba(28,33,67,0.7);
+            padding: 1rem 1.5rem; border-radius: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+        }
+        .type-matchups h3 { margin-bottom: 0.5rem; font-size: 1rem; }
+        .matchup-col:nth-child(1) h3 { color: var(--danger-color); } /* Weaknesses */
+        .matchup-col:nth-child(2) h3 { color: var(--success-color); } /* Strengths */
+        
+        .stats-container { margin-bottom: 2rem; }
+        .stats-container h3 { margin-bottom: 1rem; font-size: 1.2rem; }
+        .stat-row { display: grid; grid-template-columns: 120px 1fr; align-items: center; margin-bottom: 0.75rem; font-weight: 600; font-size: 0.9rem; }
+        .stat-bar { width: 100%; background-color: var(--primary-bg); border-radius: 5px; overflow: hidden; }
+        .stat-bar-inner { height: 20px; border-radius: 5px; transition: width 0.5s ease-out; text-align: right; padding-right: 8px; color: rgba(0,0,0,0.8); font-size: 0.9rem; }
+        
+        #stat-hp .stat-bar-inner { background: linear-gradient(90deg, #FF5959, #FF9595); }
+        #stat-attack .stat-bar-inner { background: linear-gradient(90deg, #F5AC78, #F7C6A3); }
+        #stat-defense .stat-bar-inner { background: linear-gradient(90deg, #FAE078, #FBF0A7); }
+        #stat-sp-attack .stat-bar-inner { background: linear-gradient(90deg, #8888EC, #A29DF7); }
+        #stat-sp-defense .stat-bar-inner { background: linear-gradient(90deg, #78C850, #A7DB8D); }
+        #stat-speed .stat-bar-inner { background: linear-gradient(90deg, #9DB7F5, #BBD0FA); }
+        
+        .evolution-container {
+            margin-bottom: 2rem; background: rgba(28,33,67,0.7);
+            padding: 1.5rem; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;
+        }
+        .evolution-container .evo-stage-item { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .evolution-container .evo-stage-item img { width: 70px; height: 70px; }
+        .evolution-container .evo-arrow { font-size: 1.5rem; color: var(--text-secondary); margin: 0 0.5rem; }
+
+        .interactive-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .collapsible-button {
+            background-color: var(--accent-color); color: var(--text-primary); border: none; padding: 0.75rem 1.5rem;
+            border-radius: 8px; font-family: 'Poppins', sans-serif;
+            font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s ease;
+        }
+        .collapsible-button:hover { background-color: var(--accent-hover); }
+        
+        .collapsible-content {
+            grid-column: 1 / -1; max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+            background-color: rgba(28, 33, 67, 0.5);
+            border-radius: 8px; padding: 0 1.5rem; margin-top: 1rem;
+        }
+        .collapsible-content.visible { padding: 1.5rem; max-height: 500px; }
+        .collapsible-content p { line-height: 1.7; color: var(--text-secondary); }
+        .collapsible-content ul { list-style-position: inside; line-height: 1.8; color: var(--text-secondary); padding-left: 0.5rem; }
+        .collapsible-content li::marker { color: var(--accent-color); }
+        
+    </style>
+</head>
+<body>
+
+    <div class="guide-container">
+        <nav class="nav-panel">
+            <h1>Teacher's Pokédex</h1>
+            <ul class="nav-list" id="navList"></ul>
+        </nav>
+        
+        <main class="content-panel">
+            <div class="pokemon-header">
+                <img id="pokemon-sprite" src="" alt="Pokémon Sprite">
+                <div class="pokemon-title">
+                    <h2 id="pokemon-name"></h2>
+                    <div id="pokemon-types"></div>
+                </div>
+            </div>
+
+            <div class="type-matchups">
+                <div class="matchup-col">
+                    <h3>Weaknesses</h3>
+                    <div id="pokemon-weaknesses"></div>
+                </div>
+                 <div class="matchup-col">
+                    <h3>Strengths</h3>
+                    <div id="pokemon-strengths"></div>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <h3>Permanent Stats</h3>
+                <div class="stat-row" id="stat-hp"><span>HP</span><div class="stat-bar"><div class="stat-bar-inner"></div></div></div>
+                <div class="stat-row" id="stat-attack"><span>Attack</span><div class="stat-bar"><div class="stat-bar-inner"></div></div></div>
+                <div class="stat-row" id="stat-defense"><span>Defense</span><div class="stat-bar"><div class="stat-bar-inner"></div></div></div>
+                <div class="stat-row" id="stat-sp-attack"><span>Sp. Attack</span><div class="stat-bar"><div class="stat-bar-inner"></div></div></div>
+                <div class="stat-row" id="stat-sp-defense"><span>Sp. Defense</span><div class="stat-bar"><div class="stat-bar-inner"></div></div></div>
+                <div class="stat-row" id="stat-speed"><span>Speed</span><div class="stat-bar"><div class="stat-bar-inner"></div></div></div>
+            </div>
+            
+            <div id="evolution-line-display" class="evolution-container"></div>
+            
+            <div class="interactive-buttons">
+                <button class="collapsible-button" data-target="analysis-content">Analysis</button>
+                <button class="collapsible-button" data-target="mistakes-content">Common Mistakes</button>
+                <div id="analysis-content" class="collapsible-content"></div>
+                <div id="mistakes-content" class="collapsible-content"></div>
+                <div id="strategies-content" class="collapsible-content"></div>
+                <button class="collapsible-button" data-target="strategies-content">Effective Strategies</button>
+            </div>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const pokedexEntries = [
+        {
+            encounter: "Student Disengagement",
+            pokemonName: "#143 Snorlax",
+            pokemonTypes: ["Normal"],
+            typeWeaknesses: ["Fighting"],
+            typeStrengths: ["None"],
+            spriteUrl: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png",
+            stats: { hp: 160, attack: 110, defense: 65, spAttack: 65, spDefense: 110, speed: 30 },
+            evolutionHtml: `<div class="evo-stage-item"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/446.png" alt="Munchlax"><span>Munchlax</span></div><span class="evo-arrow">➔ Lv. up w/ high Friendship ➔</span><div class="evo-stage-item"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png" alt="Snorlax"><span>Snorlax</span></div>`,
+            analysis: "The Snorlax represents a classroom where energy is low and learning is passive. This teacher often relies heavily on lecturing ('body slam' of information) and rarely incorporates student movement or interaction, blocking the path of inquiry. The classroom feels sleepy, and students, while not disruptive, are not truly engaged.",
+            mistakes: `<ul><li>Relying solely on lecture-based, "sit-and-get" instruction.</li><li>Not incorporating checks for understanding, allowing students to mentally drift off.</li><li>Using the same activity structure for every class period without variation.</li></ul>`,
+            strategies: `<ul><li><b>Think-Pair-Share:</b> Pose a question, give students 30 seconds to think, 1 minute to discuss with a partner, then call on pairs to share.</li><li><b>Four Corners:</b> Label corners of the room A, B, C, D. Pose a multiple-choice question and have students walk to the corner that represents their answer.</li><li><b>Timed Rotations (Stations):</b> Break up a long task into smaller chunks at different 'stations' around the room, requiring students to move every 10-15 minutes.</li><li><b>Brain Breaks:</b> Plan a 1-2 minute non-curricular, fun activity to reset focus, like a quick stretching routine or a "would you rather" question.</li></ul>`
+        },
+        {
+            encounter: "Underestimated Potential",
+            pokemonName: "#129 Magikarp",
+            pokemonTypes: ["Water"],
+            typeWeaknesses: ["Electric", "Grass"],
+            typeStrengths: ["Fire", "Ground", "Rock"],
+            spriteUrl: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/129.png",
+            stats: { hp: 20, attack: 10, defense: 55, spAttack: 15, spDefense: 20, speed: 80 },
+            evolutionHtml: `<div class="evo-stage-item"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/129.png" alt="Magikarp"><span>Magikarp</span></div><span class="evo-arrow">➔ Level 20 ➔</span><div class="evo-stage-item"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png" alt="Gyarados"><span>Gyarados</span></div>`,
+            analysis: "The Magikarp represents the mistake of judging students based on initial impressions or past performance. This teacher might see a student who is struggling or disengaged ('splashing' aimlessly) and label them as 'weak' or 'useless,' failing to see their immense potential for growth (their 'Gyarados').",
+            mistakes: `<ul><li>Forming fixed opinions based on student records or the first week of class.</li><li>Giving up on a student after a few failed attempts at a concept.</li><li>Providing less attention or fewer opportunities to students perceived as "weaker."</li></ul>`,
+            strategies: `<ul><li><b>Scaffold Rigorously:</b> Provide sentence starters, graphic organizers, and exemplars to give struggling students a clear path to high-level work.</li><li><b>Praise the Process, Not Just the Result:</b> Give specific, positive feedback on effort, strategy, and improvement.</li><li><b>Multiple Intelligences:</b> Offer various ways for students to demonstrate mastery—through writing, drawing, speaking, or building. Not every student's strength is a traditional test.</li><li><b>One-on-One Check-ins:</b> Spend 2 minutes with a specific student to ask how they're doing and what support they need. This builds trust and shows you value them.</li></ul>`
+        },
+        {
+            encounter: "Overly Complex Material",
+            pokemonName: "#065 Alakazam",
+            pokemonTypes: ["Psychic"],
+            typeWeaknesses: ["Bug", "Ghost", "Dark"],
+            typeStrengths: ["Fighting", "Poison"],
+            spriteUrl: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/65.png",
+            stats: { hp: 55, attack: 50, defense: 45, spAttack: 135, spDefense: 95, speed: 120 },
+            evolutionHtml: `<div class="evo-stage-item"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/63.png" alt="Abra"><span>Abra</span></div><span class="evo-arrow">➔ Lvl 16 ➔</span><div class="evo-stage-item"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/64.png" alt="Kadabra"><span>Kadabra</span></div><span class="evo-arrow">➔ Trade ➔</span><div class="evo-stage-item"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/65.png" alt="Alakazam"><span>Alakazam</span></div>`,
+            analysis: "The Alakazam, with its 5000 IQ, represents the well-intentioned 'curse of knowledge.' This teacher is a subject matter expert who explains concepts using high-level academic language ('psychic' jargon) without realizing students lack the foundational knowledge to understand it. They move at a 'speed' that leaves many behind.",
+            mistakes: `<ul><li>Using Tier 3 (subject-specific) vocabulary without explicitly defining it first.</li><li>Assuming students have mastered concepts from previous grades or units.</li><li>Failing to break down multi-step processes or complex ideas into smaller, digestible chunks.</li></ul>`,
+            strategies: `<ul><li><b>Concept Definition Map:</b> For any new, complex term, have students fill out a graphic organizer with the definition, characteristics, and examples/non-examples.</li><li><b>Model and "I Do, We Do, You Do":</b> First, model the entire process yourself while thinking aloud. Then, do an example with the whole class. Finally, release them to try it on their own.</li><li><b>Analogies & Metaphors:</b> Connect abstract academic concepts to something concrete that students already understand from their daily lives.</li><li><b>Pre-Teach Vocabulary:</b> Introduce and define key vocabulary words at the *beginning* of a unit, not in the middle of a complex reading.</li></ul>`
+        },
+        {
+            encounter: "Inauthentic Teaching",
+            pokemonName: "#132 Ditto",
+            pokemonTypes: ["Normal"],
+            typeWeaknesses: ["Fighting"],
+            typeStrengths: ["None"],
+            spriteUrl: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png",
+            stats: { hp: 48, attack: 48, defense: 48, spAttack: 48, spDefense: 48, speed: 48 },
+            evolutionHtml: `<div class="evo-stage-item"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png" alt="Ditto"><span>No Evolution</span></div>`,
+            analysis: "The Ditto represents a new teacher trying to 'transform' into a 'perfect' teacher they saw on social media or their mentor teacher. They rigidly follow a script or another's style, but it comes across as inauthentic. Like Ditto's imperfect transformation, students can tell something is 'off,' which hinders genuine connection.",
+            mistakes: `<ul><li>Reading directly from a provided curriculum script without adapting it.</li><li>Adopting a classroom management persona that doesn't fit their personality.</li><li>Refusing to deviate from a lesson plan even when students are confused or a teachable moment arises.</li></ul>`,
+            strategies: `<ul><li><b>Find Your 'Teacher Voice':</b> Practice explaining concepts in your own words. Record yourself to hear how you sound. It's okay to be a quiet, witty, or energetic teacher—as long as it's genuine.</li><li><b>Adapt, Don't Adopt:</b> Take the great strategies you see from others, but tweak them to fit your personality and your students' needs.</li><li><b>Share Appropriately:</b> Be a human. Share a relevant, brief story about your own life or learning process. This builds rapport and shows you are more than just a content-delivery machine.</li><li><b>Plan for Flexibility:</b> Build in 5-10 minutes of buffer time into your lesson plans. This gives you room to re-teach, answer unexpected questions, or explore a tangent if it's productive.</li></ul>`
+        }
+    ];
+
+    // Get all DOM elements
+    const navList = document.getElementById('navList');
+    const pokemonSprite = document.getElementById('pokemon-sprite');
+    const pokemonNameEl = document.getElementById('pokemon-name');
+    const pokemonTypesContainer = document.getElementById('pokemon-types');
+    const pokemonWeaknessesContainer = document.getElementById('pokemon-weaknesses');
+    const pokemonStrengthsContainer = document.getElementById('pokemon-strengths');
+    const evolutionDisplay = document.getElementById('evolution-line-display');
+    const contentPanels = {
+        analysis: document.getElementById('analysis-content'),
+        mistakes: document.getElementById('mistakes-content'),
+        strategies: document.getElementById('strategies-content')
+    };
+    const MAX_STAT_VALUE = 255;
+
+    function createTypeBadge(type) {
+        const badge = document.createElement('span');
+        badge.className = `type-badge type-${type.toLowerCase()}`;
+        badge.textContent = type;
+        return badge;
+    }
+
+    function updateContent(index) {
+        const entry = pokedexEntries[index];
+        // Header
+        pokemonSprite.src = entry.spriteUrl;
+        pokemonNameEl.textContent = entry.pokemonName;
+        // Types
+        pokemonTypesContainer.innerHTML = '';
+        entry.pokemonTypes.forEach(type => pokemonTypesContainer.appendChild(createTypeBadge(type)));
+        // Matchups
+        pokemonWeaknessesContainer.innerHTML = '';
+        entry.typeWeaknesses.forEach(type => pokemonWeaknessesContainer.appendChild(createTypeBadge(type)));
+        pokemonStrengthsContainer.innerHTML = '';
+        entry.typeStrengths.forEach(type => pokemonStrengthsContainer.appendChild(createTypeBadge(type)));
+        // Stats
+        Object.keys(entry.stats).forEach(key => {
+            const statKey = key === 'spAttack' ? 'sp-attack' : key === 'spDefense' ? 'sp-defense' : key;
+            const bar = document.querySelector(`#stat-${statKey} .stat-bar-inner`);
+            if (bar) {
+                bar.style.width = (entry.stats[key] / MAX_STAT_VALUE * 100) + '%';
+                bar.textContent = entry.stats[key];
+            }
+        });
+        // Evolution
+        evolutionDisplay.innerHTML = entry.evolutionHtml;
+        // Collapsible Content
+        contentPanels.analysis.innerHTML = `<p>${entry.analysis}</p>`;
+        contentPanels.mistakes.innerHTML = entry.mistakes;
+        contentPanels.strategies.innerHTML = entry.strategies;
+
+        document.querySelectorAll('.collapsible-content').forEach(panel => panel.classList.remove('visible'));
+    }
+
+    // Populate navigation
+    pokedexEntries.forEach((entry, index) => {
+        const li = document.createElement('li');
+        li.textContent = entry.encounter;
+        li.className = 'nav-item';
+        li.dataset.index = index;
+        li.addEventListener('click', () => {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            li.classList.add('active');
+            updateContent(index);
+        });
+        navList.appendChild(li);
+    });
+
+    // Handle collapsible buttons
+    document.querySelectorAll('.collapsible-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const targetPanel = document.getElementById(button.dataset.target);
+            const isVisible = targetPanel.classList.contains('visible');
+            document.querySelectorAll('.collapsible-content').forEach(panel => panel.classList.remove('visible'));
+            if (!isVisible) targetPanel.classList.add('visible');
+        });
+    });
+
+    // Initial load
+    document.querySelector('.nav-item').classList.add('active');
+    updateContent(0);
+});
+</script>
+
+</body>
+</html>
